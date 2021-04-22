@@ -1,14 +1,13 @@
 import React from "react";
-// import GridComposer from "./GridComposer";
-import ResponsiveLocalStorageLayout from "./GridComposer"
-// import BasicLayout from "./grids-demo/1-basic"
+import ResponsiveLocalStorageLayout from "./GridComposer";
+import BasicLine from "./chart/line/BasicLine";
 
 class App extends React.Component {
-
   render() {
     return (
       <div>
-        <ResponsiveLocalStorageLayout/>
+        <ResponsiveLocalStorageLayout />
+        {/* <BasicLine /> */}
       </div>
     );
   }

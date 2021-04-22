@@ -1,8 +1,10 @@
 import React from "react";
 import { WidthProvider, Responsive } from "react-grid-layout";
+import _ from "lodash";
 import Button from "@material-ui/core/Button";
 // import { makeStyles } from "@material-ui/core/styles";
-import Line from "./chart/Line";
+
+import ItemSwitchDialog from "./ItemSwithDialog";
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 const originalLayouts = getFromLS("layouts") || {};
@@ -22,11 +24,11 @@ export default function ResponsiveLocalStorageLayout() {
     };
   });
 
-  const [addItemModalOpen, setAddItemModalOpen] = React.useState(false);
   const [layouts, setLayouts] = React.useState(
     JSON.parse(JSON.stringify(originalLayouts))
   );
   const [items, setItems] = React.useState(itemsTemplate);
+  const [newCounter, setNewCounter] = React.useState(0);
 
   const createElement = (el) => {
     const removeStyle = {
@@ -49,23 +51,25 @@ export default function ResponsiveLocalStorageLayout() {
         ) : (
           <span className="text">{i}</span>
         )}
-        <span
-          className="remove"
-          style={removeStyle}
-          onClick={this.onRemoveItem.bind(this, i)}
-        >
+        <span className="remove" style={removeStyle}>
           x
         </span>
       </div>
     );
   };
 
-  const openAddItemModal = () => {
-    setAddItemModalOpen(true);
-  };
-
   const onAddItem = () => {
     console.log("add item");
+    setItems(
+      items.concat({
+        i: "n" + newCounter,
+        x: (items.length * 2) % 12,
+        y: Infinity,
+        w: 2,
+        h: 2,
+      })
+    );
+    setNewCounter(newCounter + 1);
   };
 
   const resetLayout = () => {
@@ -82,9 +86,10 @@ export default function ResponsiveLocalStorageLayout() {
       <Button variant="contained" color="primary" onClick={() => resetLayout()}>
         重置模板
       </Button>
-      <Button variant="contained" color="primary" onClick={onAddItem}>
+      {/* <Button variant="contained" color="primary" onClick={onAddItem}>
         添加模块
-      </Button>
+      </Button> */}
+      <ItemSwitchDialog />
 
       <ResponsiveReactGridLayout
         className="layout"
@@ -93,21 +98,7 @@ export default function ResponsiveLocalStorageLayout() {
         layouts={layouts}
         onLayoutChange={(layout, layouts) => onLayoutChange(layout, layouts)}
       >
-        <div key="1" data-grid={{ w: 6, h: 16, x: 0, y: 0 }}>
-          <Line />
-        </div>
-        <div key="2" data-grid={{ w: 2, h: 3, x: 2, y: 0, minW: 2, minH: 3 }}>
-          <span className="text">2</span>
-        </div>
-        <div key="3" data-grid={{ w: 2, h: 3, x: 4, y: 0, minW: 2, minH: 3 }}>
-          <span className="text">3</span>
-        </div>
-        <div key="4" data-grid={{ w: 2, h: 3, x: 6, y: 0, minW: 2, minH: 3 }}>
-          <span className="text">4</span>
-        </div>
-        <div key="5" data-grid={{ w: 2, h: 3, x: 8, y: 0, minW: 2, minH: 3 }}>
-          <span className="text">5</span>
-        </div>
+        {_.map(items, (el) => createElement(el))}
       </ResponsiveReactGridLayout>
     </div>
   );
