@@ -9,10 +9,11 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import Paper from "@material-ui/core/Paper";
 import InputLabel from "@material-ui/core/InputLabel";
 import Input from "@material-ui/core/Input";
-import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import Draggable from "react-draggable";
+
+import _ from "lodash";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -46,6 +47,7 @@ export default function ItemSwitchDialog() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
   const [group, setGroup] = React.useState("");
+  const [options, setOptions] = React.useState([]);
   const [option, setOption] = React.useState("");
 
   const handleClickOpen = () => {
@@ -56,26 +58,38 @@ export default function ItemSwitchDialog() {
     setOpen(false);
   };
 
-  let options = "";
+  const handleComfirm = () => {
+    setOpen(false);
+  };
+
+  const createOtionElement = (option) => {
+    return (
+      <option key={option.id} value={option.id}>
+        {option.name}
+      </option>
+    );
+  };
 
   const handleGroupChange = (event) => {
     let value = event.target.value;
     setGroup(value);
-    options = groupList[value].options.map((option) => {
-      return <option value={option.id}>{option.name}</option>;
-    });
+    setOptions(groupList[value].options);
+    return groupList[value];
   };
 
-  const handleChange = () => {};
+  const handleOptionChange = (event) => {
+    let value = event.target.value;
+    setOption(value);
+  };
 
   const groups = Object.keys(groupList).map((group) => {
     return <option value={group}>{groupList[group].name}</option>;
   });
 
   return (
-    <div>
+    <div className="div-inline">
       <Button variant="outlined" color="primary" onClick={handleClickOpen}>
-        Open form dialog
+        添加模块
       </Button>
       <Dialog
         open={open}
@@ -89,12 +103,12 @@ export default function ItemSwitchDialog() {
         <DialogContent>
           <form className={classes.container}>
             <FormControl className={classes.formControl}>
-              <InputLabel htmlFor="demo-dialog-native">表格类型</InputLabel>
+              <InputLabel>表格类型</InputLabel>
               <Select
                 native
                 value={group}
                 onChange={handleGroupChange}
-                input={<Input id="demo-dialog-native" />}
+                input={<Input />}
               >
                 <option aria-label="None" value="" />
                 {groups}
@@ -106,13 +120,11 @@ export default function ItemSwitchDialog() {
                 labelId="demo-dialog-select-label"
                 id="demo-dialog-select"
                 value={option}
-                onChange={handleChange}
+                onChange={handleOptionChange}
                 input={<Input />}
               >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                {options}
+                <option aria-label="None" value="" />
+                {_.map(options, (option) => createOtionElement(option))}
               </Select>
             </FormControl>
           </form>
@@ -121,7 +133,7 @@ export default function ItemSwitchDialog() {
           <Button autoFocus onClick={handleClose} color="primary">
             取消
           </Button>
-          <Button onClick={handleClose} color="primary">
+          <Button onClick={handleComfirm} color="primary">
             确定
           </Button>
         </DialogActions>

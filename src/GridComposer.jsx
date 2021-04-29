@@ -5,6 +5,7 @@ import Button from "@material-ui/core/Button";
 // import { makeStyles } from "@material-ui/core/styles";
 
 import ItemSwitchDialog from "./ItemSwithDialog";
+import "./GridComposer.css";
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 const originalLayouts = getFromLS("layouts") || {};
@@ -30,6 +31,8 @@ export default function ResponsiveLocalStorageLayout() {
   const [items, setItems] = React.useState(itemsTemplate);
   const [newCounter, setNewCounter] = React.useState(0);
 
+  // 通过item创建grid内容
+  // todo 需要修改
   const createElement = (el) => {
     const removeStyle = {
       position: "absolute",
@@ -58,6 +61,7 @@ export default function ResponsiveLocalStorageLayout() {
     );
   };
 
+  // 往items中添加元素
   const onAddItem = () => {
     console.log("add item");
     setItems(
@@ -72,6 +76,7 @@ export default function ResponsiveLocalStorageLayout() {
     setNewCounter(newCounter + 1);
   };
 
+  // 重置布局
   const resetLayout = () => {
     setLayouts(originalLayouts);
   };
@@ -83,13 +88,23 @@ export default function ResponsiveLocalStorageLayout() {
 
   return (
     <div>
-      <Button variant="contained" color="primary" onClick={() => resetLayout()}>
-        重置模板
-      </Button>
-      {/* <Button variant="contained" color="primary" onClick={onAddItem}>
-        添加模块
-      </Button> */}
-      <ItemSwitchDialog />
+      <div>
+        <div className="div-inline">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => resetLayout()}
+          >
+            重置模板
+          </Button>
+        </div>
+        <div className="div-inline">
+          <Button variant="contained" color="primary" onClick={onAddItem}>
+            添加模块
+          </Button>
+        </div>
+        <ItemSwitchDialog />
+      </div>
 
       <ResponsiveReactGridLayout
         className="layout"
