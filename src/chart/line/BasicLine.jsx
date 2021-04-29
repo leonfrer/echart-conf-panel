@@ -31,15 +31,16 @@ export default function BasicLine(props) {
 
   let offsetWidth = document.body.offsetWidth;
   const col = { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 };
+  const breakpoints = { lg: 1200, md: 996, sm: 576, xs: 576, xxs: 0 };
 
   let width;
-  if (offsetWidth >= 1200) {
+  if (offsetWidth >= breakpoints.lg) {
     width = (offsetWidth * props.w) / col.lg;
-  } else if (offsetWidth >= 992) {
+  } else if (offsetWidth >= breakpoints.md) {
     width = (offsetWidth * props.w) / col.md;
-  } else if (offsetWidth >= 768) {
+  } else if (offsetWidth >= breakpoints.sm) {
     width = (offsetWidth * props.w) / col.sm;
-  } else if (offsetWidth >= 576) {
+  } else if (offsetWidth >= breakpoints.xs) {
     width = (offsetWidth * props.w) / col.xs;
   } else {
     width = (offsetWidth * props.w) / col.xxs;
