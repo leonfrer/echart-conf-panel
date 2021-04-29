@@ -5,7 +5,9 @@ import Button from "@material-ui/core/Button";
 // import { makeStyles } from "@material-ui/core/styles";
 
 import ItemSwitchDialog from "./ItemSwithDialog";
+import itemsTemplate from "./conf/defaultItems.json";
 import "./GridComposer.css";
+import BasicLine from "./chart/line/BasicLine";
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 const originalLayouts = getFromLS("layouts") || {};
@@ -14,17 +16,6 @@ const originalLayouts = getFromLS("layouts") || {};
  * This layout demonstrates how to sync multiple responsive layouts to localstorage.
  */
 export default function ResponsiveLocalStorageLayout() {
-  const itemsTemplate = [0, 1, 2, 3, 4].map((i, key, list) => {
-    return {
-      i: i.toString(),
-      x: i * 2,
-      y: 0,
-      w: 2,
-      h: 2,
-      add: i === list.length - 1,
-    };
-  });
-
   const [layouts, setLayouts] = React.useState(
     JSON.parse(JSON.stringify(originalLayouts))
   );
@@ -40,20 +31,32 @@ export default function ResponsiveLocalStorageLayout() {
       top: 0,
       cursor: "pointer",
     };
-    const i = el.add ? "+" : el.i;
+    const i = el.i;
+    let content;
+    const testOption = {
+      xAxis: {
+        type: "category",
+        data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      },
+      yAxis: {
+        type: "value",
+      },
+      series: [
+        {
+          data: [150, 230, 224, 218, 135, 147, 200],
+          type: "line",
+        },
+      ],
+    };
+    if (el.chartKey === "BasicLine") {
+      content = <BasicLine option={testOption} w={el.w} />;
+    } else {
+      content = i;
+    }
+
     return (
       <div key={i} data-grid={el}>
-        {el.add ? (
-          <span
-            className="add text"
-            onClick={onAddItem}
-            title="You can add an item by clicking here, too."
-          >
-            Add +
-          </span>
-        ) : (
-          <span className="text">{i}</span>
-        )}
+        <span className="text">{content}</span>
         <span className="remove" style={removeStyle}>
           x
         </span>
@@ -82,6 +85,7 @@ export default function ResponsiveLocalStorageLayout() {
   };
 
   const onLayoutChange = (layout, layouts) => {
+    // todo 保存到配置文件
     saveToLS("layouts", layouts);
     setLayouts({ layouts: layouts });
   };

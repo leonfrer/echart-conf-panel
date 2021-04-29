@@ -1,0 +1,30 @@
+[
+  {
+    "chartKey": "BasicLine",
+    "i": "a",
+    "x": 0,
+    "y": 0,
+    "w": 5,
+    "h": 7,
+    "add": false,
+    "option": {
+      "xAxis": {
+        "type": "category",
+        "data": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+      },
+      "yAxis": {
+        "type": "value"
+      },
+      "series": [
+        {
+          "data": [150, 230, 224, 218, 135, 147, 260],
+          "type": "line"
+        }
+      ]
+    }
+  },
+  { "i": "1", "x": 2, "y": 0, "w": 2, "h": 2, "add": false },
+  { "i": "2", "x": 4, "y": 0, "w": 2, "h": 2, "add": false },
+  { "i": "3", "x": 6, "y": 0, "w": 2, "h": 2, "add": false },
+  { "i": "4", "x": 8, "y": 0, "w": 2, "h": 2, "add": true }
+]
