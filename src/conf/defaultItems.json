@@ -1,12 +1,11 @@
 [
   {
-    "chartKey": "BasicLine",
     "i": "a",
     "x": 0,
     "y": 0,
     "w": 5,
     "h": 7,
-
+    "isResizable": true,
     "option": {
       "xAxis": {
         "type": "category",
