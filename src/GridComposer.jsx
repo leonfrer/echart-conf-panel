@@ -21,6 +21,13 @@ export default function ResponsiveLocalStorageLayout() {
   );
   const [items, setItems] = React.useState(itemsTemplate);
   const [newCounter, setNewCounter] = React.useState(0);
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!mounted) {
+      setMounted(true);
+    }
+  }, [mounted, setMounted]);
 
   // 通过item创建grid内容
   // todo 需要修改
@@ -53,6 +60,7 @@ export default function ResponsiveLocalStorageLayout() {
     } else {
       content = i;
     }
+    console.log(el.isResizable);
 
     return (
       <div key={i} data-grid={el}>
@@ -116,6 +124,7 @@ export default function ResponsiveLocalStorageLayout() {
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
         rowHeight={30}
         layouts={layouts}
+        useCSSTransforms={mounted}
         onLayoutChange={(layout, layouts) => onLayoutChange(layout, layouts)}
       >
         {_.map(items, (el) => createElement(el))}

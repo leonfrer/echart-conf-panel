@@ -6,7 +6,7 @@
     "y": 0,
     "w": 5,
     "h": 7,
-    "add": false,
+
     "option": {
       "xAxis": {
         "type": "category",
@@ -23,8 +23,29 @@
       ]
     }
   },
-  { "i": "1", "x": 2, "y": 0, "w": 2, "h": 2, "add": false },
-  { "i": "2", "x": 4, "y": 0, "w": 2, "h": 2, "add": false },
-  { "i": "3", "x": 6, "y": 0, "w": 2, "h": 2, "add": false },
-  { "i": "4", "x": 8, "y": 0, "w": 2, "h": 2, "add": true }
+  {
+    "i": "1",
+    "x": 2,
+    "y": 0,
+    "w": 2,
+    "h": 2,
+    "isResizable": true
+  },
+  {
+    "i": "2",
+    "x": 4,
+    "y": 0,
+    "w": 2,
+    "h": 2,
+    "isResizable": true
+  },
+  {
+    "i": "3",
+    "x": 6,
+    "y": 0,
+    "w": 2,
+    "h": 2,
+    "isResizable": true
+  },
+  { "i": "4", "x": 8, "y": 0, "w": 2, "h": 2, "isResizable": true }
 ]
