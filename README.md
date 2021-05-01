@@ -1,34 +1,36 @@
-# React-drag-grid
-
-#### 介绍
-用react构建一个自定义面板，能够在面板上自由的拖拽，新增，删除组件。
-[React-drag-grid在线演示使用](https://bilif.github.io/react-drag-grid/)
-###### ![实例效果](https://upload-images.jianshu.io/upload_images/4190280-6eac48623c4f7506.gif?imageMogr2/auto-orient/strip)
-
 #### 构建和设置
 
-``` bash
+```bash
 # install dependencies
-npm install
+yarn
 
 # serve with hot reload at localhost:3000
-npm run start
+yarn start
 
 # build for production with minification
-npm run build
+yarn build
 
 ```
 
-## 相关链接  
-- [《基于react-grid-layout实现可视化拖拽》](https://bilif.github.io/2019/05/14/React%E5%AE%9E%E7%8E%B0%E7%82%AB%E9%85%B7%E7%9A%84%E5%8F%AF%E6%8B%96%E6%8B%BD%E7%BD%91%E6%A0%BC%E5%B8%83%E5%B1%80/)
-
-
 ## 技术点
+
 - React
 - Ant Design
 - react-grid-layout
 - echarts
 
-## License
+## echarts 文档注记
 
-MIT
+使用 option 定义每个图，其中
+
+### series
+
+是指：一组数值以及他们映射成的图。包含的要素至少有：一组数值、图表类型（series.type）、以及其他的关于这些数据如何映射成图的参数。
+
+### component
+
+echarts 中各种内容，被抽象为“组件”
+
+charts 中至少有这些组件：xAxis（直角坐标系 X 轴）、yAxis（直角坐标系 Y 轴）、grid（直角坐标系底板）、angleAxis（极坐标系角度轴）、radiusAxis（极坐标系半径轴）、polar（极坐标系底板）、geo（地理坐标系）、dataZoom（数据区缩放组件）、visualMap（视觉映射组件）、tooltip（提示框组件）、toolbox（工具栏组件）、series（系列）
+
+![component](https://echarts.apache.org/zh/documents/asset/img/basic-concepts-overview/components.jpg)
