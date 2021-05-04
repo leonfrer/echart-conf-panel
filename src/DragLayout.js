@@ -1,5 +1,15 @@
 import React, { PureComponent } from "react";
-import { Modal, Layout, Button, Input, Form, Divider, Select } from "antd";
+import {
+  Modal,
+  Layout,
+  Button,
+  Input,
+  Form,
+  Divider,
+  Select,
+  Row,
+  Col,
+} from "antd";
 import { WidthProvider, Responsive } from "react-grid-layout";
 import _ from "lodash";
 import ReactEcharts from "echarts-for-react";
@@ -154,7 +164,6 @@ export default class DragLayout extends PureComponent {
   }
 
   onRemoveItem(i) {
-    console.log(this.state.widgets);
     this.setState({
       widgets: this.state.widgets.filter((item, index) => index !== i),
     });
@@ -186,21 +195,33 @@ export default class DragLayout extends PureComponent {
     this.setState({ barModalVisible: false });
   }
   barFormFinish(form) {
+    let xAxis_data = JSON.parse(form.xAxis_data);
+    let series_0_data = JSON.parse(form.series_0_data);
     let option = {
       xAxis: {
         type: "category",
-        data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        data: xAxis_data,
       },
       yAxis: {
         type: "value",
       },
       series: [
         {
-          data: [120, 200, 150, 80, 70, 110, 130],
+          data: series_0_data,
           type: "bar",
         },
       ],
     };
+    Object.keys(form)
+      .filter((url) => url.endsWith("_url"))
+      .forEach(
+        (url) => {
+          if (!_.isEmpty(form[url])) {
+            option[url] = form[url];
+          }
+        },
+        [form, option]
+      );
     this.addChart(option);
     this.setState({ barModalVisible: false });
     this.formRef.current.resetFields();
@@ -232,9 +253,6 @@ export default class DragLayout extends PureComponent {
         text: form.titleText,
       },
     };
-    if (!_.isEmpty(form.xAxis_data_url)) {
-      option.xAxis_data_url = form.xAxis_data_url;
-    }
     Object.keys(form)
       .filter((url) => url.endsWith("_url"))
       .forEach(
@@ -309,7 +327,7 @@ export default class DragLayout extends PureComponent {
           </Button>
           <Modal
             title="添加柱状图"
-            width={1000}
+            width={800}
             visible={this.state.barModalVisible}
             onCancel={this.barFormCancel}
             destroyOnClose={true}
@@ -321,16 +339,37 @@ export default class DragLayout extends PureComponent {
               ref={this.formRef}
               onFinish={this.barFormFinish}
             >
-              <Form.Item
-                name="titleText"
-                label="图表标题"
-                style={{
-                  display: "inline-block",
-                  width: "20%",
-                }}
-              >
-                <Input />
-              </Form.Item>
+              <Row gutter={8}>
+                <Col span={6}>
+                  <Form.Item name="titleText" label="图表标题">
+                    <Input />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={8}>
+                <Col span={8}>
+                  <Form.Item name="series_0_data" label="默认数据">
+                    <Input />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item name="series_0_data_url" label="数据Url">
+                    <Input />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={8}>
+                <Col span={8}>
+                  <Form.Item name="xAxis_data" label="x轴默认数据">
+                    <Input />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item name="xAxis_data_url" label="x轴默认数据Url">
+                    <Input />
+                  </Form.Item>
+                </Col>
+              </Row>
               <Divider />
               <Form.Item style={{ display: "inline-block" }}>
                 <Button
@@ -362,7 +401,7 @@ export default class DragLayout extends PureComponent {
           </Button>
           <Modal
             title="添加折线图"
-            width={700}
+            width={800}
             visible={this.state.lineModalVisible}
             onCancel={this.lineFormCancel}
             destroyOnClose={true}
@@ -374,82 +413,58 @@ export default class DragLayout extends PureComponent {
               ref={this.formRef}
               onFinish={this.lineFormFinish}
             >
-              <Form.Item
-                name="titleText"
-                label="图表标题"
-                style={{
-                  display: "inline-block",
-                  width: "40%",
-                }}
-              >
-                <Input />
-              </Form.Item>
-
+              <Row gutter={8}>
+                <Col span={6}>
+                  <Form.Item name="titleText" label="图表标题">
+                    <Input />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={8}>
+                <Col span={8}>
+                  <Form.Item
+                    name="series_0_data"
+                    label="默认数据（数据Url请求失败时展示）"
+                  >
+                    <Input placeholder="[150, 230, 224, 218, 135, 147, 260]" />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item name="series_0_data_url" label="数据Url">
+                    <Input placeholder="return: {success: true, data: [...]}" />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={8}>
+                <Col span={4}>
+                  <Form.Item
+                    name="xType"
+                    label="x坐标轴类型"
+                    initialValue="category"
+                  >
+                    <Select allowClear>
+                      <Select.Option value="value">数值轴</Select.Option>
+                      <Select.Option value="category">类目轴</Select.Option>
+                      <Select.Option value="time">时间轴</Select.Option>
+                      <Select.Option value="log">对数轴</Select.Option>
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col span={9}>
+                  <Form.Item
+                    name="xAxis_data"
+                    label="x轴下标数据（x轴Url无数据时展示）"
+                  >
+                    <Input placeholder="['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']" />
+                  </Form.Item>
+                </Col>
+                <Col span={9}>
+                  <Form.Item name="xAxis_data_url" label="x轴下标数据Url">
+                    <Input placeholder="return: {success: true, data: [...]}" />
+                  </Form.Item>
+                </Col>
+              </Row>
               <Divider />
-
-              <Form.Item
-                name="series_0_data"
-                label="默认数据（数据Url请求失败时展示）"
-                style={{
-                  display: "inline-block",
-                  width: "40%",
-                }}
-              >
-                {/* todo 验证 */}
-                <Input placeholder="[150, 230, 224, 218, 135, 147, 260]" />
-              </Form.Item>
-              <Form.Item
-                name="series_0_data_url"
-                label="数据Url"
-                style={{
-                  display: "inline-block",
-                  width: "40%",
-                }}
-              >
-                <Input placeholder="example：{success: true, data: [...]}" />
-              </Form.Item>
-
-              <Divider />
-
-              <Form.Item
-                name="xAxis_data"
-                label="x轴下标数据（x轴Url无数据时展示）"
-                style={{
-                  display: "inline-block",
-                  width: "40%",
-                }}
-              >
-                <Input placeholder="['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']" />
-              </Form.Item>
-              <Form.Item
-                name="xAxis_data_url"
-                label="x轴下标数据Url"
-                style={{
-                  display: "inline-block",
-                  width: "40%",
-                }}
-              >
-                <Input placeholder="example: {success: true, data: [...]}" />
-              </Form.Item>
-              <Form.Item
-                name="xType"
-                label="x坐标轴类型"
-                style={{
-                  display: "inline-block",
-                  width: "40%",
-                }}
-                initialValue="category"
-              >
-                <Select style={{ width: 230 }} allowClear>
-                  <Select.Option value="value">数值轴</Select.Option>
-                  <Select.Option value="category">类目轴</Select.Option>
-                  <Select.Option value="time">时间轴</Select.Option>
-                  <Select.Option value="log">对数轴</Select.Option>
-                </Select>
-              </Form.Item>
-
-              <Divider />
-
               <Form.Item style={{ display: "inline-block" }}>
                 <Button
                   type="primary"
