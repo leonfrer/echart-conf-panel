@@ -46,13 +46,10 @@ export default class DragLayout extends PureComponent {
 
     this.customFormCancel = this.customFormCancel.bind(this);
     this.customFormFinish = this.customFormFinish.bind(this);
-    this.getOpiton = this.getOpiton.bind(this);
   }
 
-  componentDidMount() {}
-
-  componentDidUpdate() {
-    this.timeId = setInterval(() => this.updateWidgets(), 1000);
+  componentDidMount() {
+    this.timeId = setInterval(() => this.updateWidgets(), 8000);
   }
 
   componentWillUnmount() {
@@ -60,25 +57,40 @@ export default class DragLayout extends PureComponent {
   }
 
   updateWidgets() {
-    console.log("update");
-    let widgets = this.state.widgets;
+    let widgets = _.cloneDeep(this.state.widgets);
     if (!!!widgets.length) {
       return;
     }
     for (let i = 0; i < widgets.length; i++) {
-      widgets[i].option.series[0].data = [200, 200, 200, 200, 200, 200, 200];
-      // let optionKeys = Object.keys(widgets[i].option);
-      // optionKeys.filter((key) => key.endsWith("url"));
-      // console.log(optionKeys);
+      let widget = _.cloneDeep(widgets[i]);
+      let option = widget.option;
+      let optionKeys = Object.keys(option);
+      optionKeys = optionKeys.filter((key) => key.endsWith("_url"));
+      if (optionKeys.length < 1) {
+        continue;
+      }
+      for (let i = 0; i < optionKeys.length; i++) {
+        const key = optionKeys[i];
+        axios({
+          url: corsServerUrl + option[key],
+          method: "GET",
+        })
+          .then((res) => {
+            if (!!res.data && res.data.success) {
+              // todo 验证data
+              let data = res.data.data;
+              let ks = key.split("_");
+              ks.pop();
+              _.set(widget, ["option"].concat(ks), data);
+            }
+          })
+          .catch((err) => {});
+      }
+      widgets[i] = widget;
     }
     this.setState({
       widgets: widgets,
     });
-  }
-
-  getOpiton(i) {
-    console.log(i);
-    return this.state.widgets[i].option;
   }
 
   formRef = React.createRef();
@@ -113,7 +125,7 @@ export default class DragLayout extends PureComponent {
             x
           </span>
           <ReactEcharts
-            option={this.getOpiton(i)}
+            option={l.option}
             notMerge={true}
             lazyUpdate={true}
             style={{ width: "100%", height: "100%" }}
@@ -168,31 +180,28 @@ export default class DragLayout extends PureComponent {
       errorMsg: null,
     };
   }
-  ncvcvnmnwq;
-  // get data
-  getData = (url, defaultData) => {
-    let data = "";
-    axios({
-      url: corsServerUrl + url,
-      method: "GET",
-    }).then((res) => {
-      console.log(res);
-      if (!!res.data && res.data.success) {
-        data = res.data.data;
-      }
-    });
-    if (data === "") {
-      data = defaultData;
-    }
-  };
 
   // 柱状图添加表单
   barFormCancel() {
     this.setState({ barModalVisible: false });
   }
   barFormFinish(form) {
-    console.log(form);
-    // todo
+    let option = {
+      xAxis: {
+        type: "category",
+        data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      },
+      yAxis: {
+        type: "value",
+      },
+      series: [
+        {
+          data: [120, 200, 150, 80, 70, 110, 130],
+          type: "bar",
+        },
+      ],
+    };
+    this.addChart(option);
     this.setState({ barModalVisible: false });
     this.formRef.current.resetFields();
   }
@@ -202,11 +211,8 @@ export default class DragLayout extends PureComponent {
     this.setState({ lineModalVisible: false });
   }
   lineFormFinish(form) {
-    // console.log(form);
-    let xData = JSON.parse(form.xData);
-    let data = JSON.parse(form.defaultData);
-    console.log("data: " + data);
-    console.log("xData: " + xData);
+    let xData = JSON.parse(form.xAxis_data);
+    let data = JSON.parse(form.series_0_data);
 
     let option = {
       xAxis: {
@@ -225,9 +231,21 @@ export default class DragLayout extends PureComponent {
       title: {
         text: form.titleText,
       },
-      xAxis_data_url: form.xDataUrl,
-      series_1_data_url: form.url,
     };
+    if (!_.isEmpty(form.xAxis_data_url)) {
+      option.xAxis_data_url = form.xAxis_data_url;
+    }
+    Object.keys(form)
+      .filter((url) => url.endsWith("_url"))
+      .forEach(
+        (url) => {
+          if (!_.isEmpty(form[url])) {
+            option[url] = form[url];
+          }
+        },
+        [form, option]
+      );
+
     this.addChart(option);
     this.setState({ lineModalVisible: false });
     this.formRef.current.resetFields();
@@ -291,7 +309,7 @@ export default class DragLayout extends PureComponent {
           </Button>
           <Modal
             title="添加柱状图"
-            width={700}
+            width={1000}
             visible={this.state.barModalVisible}
             onCancel={this.barFormCancel}
             destroyOnClose={true}
@@ -302,8 +320,37 @@ export default class DragLayout extends PureComponent {
               name="form_in_modal"
               ref={this.formRef}
               onFinish={this.barFormFinish}
-            ></Form>
+            >
+              <Form.Item
+                name="titleText"
+                label="图表标题"
+                style={{
+                  display: "inline-block",
+                  width: "20%",
+                }}
+              >
+                <Input />
+              </Form.Item>
+              <Divider />
+              <Form.Item style={{ display: "inline-block" }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  style={{ marginRight: "20px" }}
+                >
+                  保存
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={this.barFormCancel}
+                  style={{ marginRight: "7px" }}
+                >
+                  取消
+                </Button>
+              </Form.Item>
+            </Form>
           </Modal>
+
           <Button
             type="primary"
             style={{ marginRight: "7px" }}
@@ -341,7 +388,7 @@ export default class DragLayout extends PureComponent {
               <Divider />
 
               <Form.Item
-                name="defaultData"
+                name="series_0_data"
                 label="默认数据（数据Url请求失败时展示）"
                 style={{
                   display: "inline-block",
@@ -352,7 +399,7 @@ export default class DragLayout extends PureComponent {
                 <Input placeholder="[150, 230, 224, 218, 135, 147, 260]" />
               </Form.Item>
               <Form.Item
-                name="url"
+                name="series_0_data_url"
                 label="数据Url"
                 style={{
                   display: "inline-block",
@@ -365,7 +412,7 @@ export default class DragLayout extends PureComponent {
               <Divider />
 
               <Form.Item
-                name="xData"
+                name="xAxis_data"
                 label="x轴下标数据（x轴Url无数据时展示）"
                 style={{
                   display: "inline-block",
@@ -375,7 +422,7 @@ export default class DragLayout extends PureComponent {
                 <Input placeholder="['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']" />
               </Form.Item>
               <Form.Item
-                name="xDataUrl"
+                name="xAxis_data_url"
                 label="x轴下标数据Url"
                 style={{
                   display: "inline-block",
@@ -421,6 +468,7 @@ export default class DragLayout extends PureComponent {
               </Form.Item>
             </Form>
           </Modal>
+
           <Button
             type="primary"
             style={{ marginRight: "7px" }}
@@ -445,8 +493,37 @@ export default class DragLayout extends PureComponent {
               name="form_in_modal"
               ref={this.formRef}
               onFinish={this.pieFormFinish}
-            ></Form>
+            >
+              <Form.Item
+                name="titleText"
+                label="图表标题"
+                style={{
+                  display: "inline-block",
+                  width: "20%",
+                }}
+              >
+                <Input />
+              </Form.Item>
+              <Divider />
+              <Form.Item style={{ display: "inline-block" }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  style={{ marginRight: "20px" }}
+                >
+                  保存
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={this.pieFormCancel}
+                  style={{ marginRight: "7px" }}
+                >
+                  取消
+                </Button>
+              </Form.Item>
+            </Form>
           </Modal>
+
           <Button
             type="primary"
             style={{ marginRight: "7px" }}
@@ -471,8 +548,37 @@ export default class DragLayout extends PureComponent {
               name="form_in_modal"
               ref={this.formRef}
               onFinish={this.scatterFormFinish}
-            ></Form>
+            >
+              <Form.Item
+                name="titleText"
+                label="图表标题"
+                style={{
+                  display: "inline-block",
+                  width: "20%",
+                }}
+              >
+                <Input />
+              </Form.Item>
+              <Divider />
+              <Form.Item style={{ display: "inline-block" }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  style={{ marginRight: "20px" }}
+                >
+                  保存
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={this.scatterFormFinish}
+                  style={{ marginRight: "7px" }}
+                >
+                  取消
+                </Button>
+              </Form.Item>
+            </Form>
           </Modal>
+
           <Button
             type="primary"
             style={{ marginRight: "7px" }}
