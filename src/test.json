@@ -1,15 +1,21 @@
-{
-  "xAxis": {
-    "type": "category",
-    "data": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-  },
-  "yAxis": {
-    "type": "value"
-  },
-  "series": [
-    {
-      "data": [120, 200, 150, 80, 70, 110, 130],
-      "type": "bar"
+[
+  {
+    "x": 0,
+    "y": null,
+    "w": 3,
+    "h": 2,
+    "i": "1620117614172",
+    "option": {
+      "xAxis": {
+        "type": "category",
+        "data": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+      },
+      "yAxis": { "type": "value" },
+      "series": [
+        { "data": [100, 200, 224, 218, 135, 147, 200], "type": "bar" }
+      ],
+      "series_0_data_url": "http://127.0.0.1:5000/api/data",
+      "xAxis_data_url": "http://127.0.0.1:5000/api/xData"
     }
-  ]
-}
+  }
+]

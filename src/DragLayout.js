@@ -31,8 +31,10 @@ export default class DragLayout extends PureComponent {
     super(props);
 
     this.state = {
-      layouts: this.getFromLS("layouts") || {},
+      // widgets: this.getLocalstorage("widgets") || [],
       widgets: [],
+      layouts: this.getLocalstorage("layouts") || {},
+      // layouts: {},
       customModalVisible: false,
       barModalVisible: false,
       lineModalVisible: false,
@@ -59,6 +61,12 @@ export default class DragLayout extends PureComponent {
   }
 
   componentDidMount() {
+    if (this.getLocalstorage("widgets")) {
+      let options = _.cloneDeep(this.getLocalstorage("widgets")).map(
+        (widget) => widget.option
+      );
+      this.initCharts(options);
+    }
     this.timeId = setInterval(() => this.updateWidgets(), 8000);
   }
 
@@ -68,7 +76,7 @@ export default class DragLayout extends PureComponent {
 
   updateWidgets() {
     let widgets = _.cloneDeep(this.state.widgets);
-    if (!!!widgets.length) {
+    if (!widgets.length) {
       return;
     }
     for (let i = 0; i < widgets.length; i++) {
@@ -98,6 +106,7 @@ export default class DragLayout extends PureComponent {
       }
       widgets[i] = widget;
     }
+    this.saveToLocalstorage("widgets", widgets);
     this.setState({
       widgets: widgets,
     });
@@ -105,8 +114,26 @@ export default class DragLayout extends PureComponent {
 
   formRef = React.createRef();
 
+  getLocalstorage(key) {
+    let ls = "";
+    if (global.localStorage) {
+      try {
+        ls = JSON.parse(global.localStorage.getItem(key)) || "";
+      } catch (e) {
+        /*Ignore*/
+      }
+    }
+    return ls;
+  }
+
+  saveToLocalstorage(key, value) {
+    if (global.localStorage) {
+      global.localStorage.setItem(key, JSON.stringify(value));
+    }
+  }
+
   getFromLS(key) {
-    let ls = {};
+    let ls = "";
     if (global.localStorage) {
       try {
         ls = JSON.parse(global.localStorage.getItem("rgl-8")) || {};
@@ -119,14 +146,22 @@ export default class DragLayout extends PureComponent {
 
   saveToLS(key, value) {
     if (global.localStorage) {
-      global.localStorage.setItem(
-        "rgl-8",
-        JSON.stringify({
-          [key]: value,
-        })
-      );
+      let rgl_8 = global.localStorage.getItem("rgl-8");
+      if (rgl_8) {
+        rgl_8 = JSON.parse(rgl_8);
+        rgl_8[key] = value;
+        global.localStorage.setItem("rgl-8", JSON.stringify(value));
+      } else {
+        global.localStorage.setItem(
+          "rgl-8",
+          JSON.stringify({
+            [key]: value,
+          })
+        );
+      }
     }
   }
+
   generateDOM = () => {
     return _.map(this.state.widgets, (l, i) => {
       return (
@@ -154,12 +189,38 @@ export default class DragLayout extends PureComponent {
       h: 2,
       i: new Date().getTime().toString(),
     };
+    let widgets = this.state.widgets.concat({
+      ...addItem,
+      // type,
+      option,
+    });
+    this.saveToLocalstorage("widgets", widgets);
     this.setState({
-      widgets: this.state.widgets.concat({
-        ...addItem,
-        // type,
-        option,
-      }),
+      widgets: widgets,
+    });
+  }
+
+  initCharts(options) {
+    let widgets = _.cloneDeep(this.state.widgets);
+    options.forEach(
+      (option, index) => {
+        const addItem = {
+          x: (index * 3) % (this.state.cols || 12),
+          y: Infinity, // puts it at the bottom
+          w: 3,
+          h: 2,
+          i: index.toString(),
+        };
+        widgets = widgets.concat({
+          ...addItem,
+          option,
+        });
+      },
+      [this, widgets]
+    );
+    this.saveToLocalstorage("widgets", widgets);
+    this.setState({
+      widgets: widgets,
     });
   }
 
@@ -170,7 +231,7 @@ export default class DragLayout extends PureComponent {
   }
 
   onLayoutChange(layout, layouts) {
-    this.saveToLS("layouts", layouts);
+    this.saveToLocalstorage("layouts", layouts);
     this.setState({ layouts });
   }
 
