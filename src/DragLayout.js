@@ -31,10 +31,11 @@ export default class DragLayout extends PureComponent {
     super(props);
 
     this.state = {
-      // widgets: this.getLocalstorage("widgets") || [],
       widgets: [],
-      layouts: this.getLocalstorage("layouts") || {},
-      // layouts: {},
+      layouts: {},
+      backupLayouts: this.getLocalstorage("layouts"),
+      backupWidgets: this.getLocalstorage("widgets"),
+      once: false,
       customModalVisible: false,
       barModalVisible: false,
       lineModalVisible: false,
@@ -61,13 +62,24 @@ export default class DragLayout extends PureComponent {
   }
 
   componentDidMount() {
-    if (this.getLocalstorage("widgets")) {
-      let options = _.cloneDeep(this.getLocalstorage("widgets")).map(
+    if (this.state.backupWidgets) {
+      let options = _.cloneDeep(this.state.backupWidgets).map(
         (widget) => widget.option
       );
       this.initCharts(options);
     }
     this.timeId = setInterval(() => this.updateWidgets(), 8000);
+  }
+
+  componentDidUpdate() {
+    console.log("update");
+    if (!this.state.once) {
+      console.log("recovery");
+      this.recoveryLastTime();
+      this.setState({
+        once: true,
+      });
+    }
   }
 
   componentWillUnmount() {
@@ -224,6 +236,18 @@ export default class DragLayout extends PureComponent {
     });
   }
 
+  recoveryLastTime = () => {
+    // this.setState({
+    //   widgets: [],
+    // });
+    // this.setState({
+    //   widgets: this.state.widgets,
+    // });
+    this.setState({
+      layouts: this.state.backupLayouts,
+    });
+  };
+
   onRemoveItem(i) {
     this.setState({
       widgets: this.state.widgets.filter((item, index) => index !== i),
@@ -231,6 +255,7 @@ export default class DragLayout extends PureComponent {
   }
 
   onLayoutChange(layout, layouts) {
+    this.saveToLocalstorage("layouts", layouts);
     this.saveToLocalstorage("layouts", layouts);
     this.setState({ layouts });
   }
@@ -658,9 +683,11 @@ export default class DragLayout extends PureComponent {
           <Button
             type="primary"
             style={{ marginRight: "7px" }}
-            onClick={() => {}}
+            onClick={() => {
+              this.recoveryLastTime();
+            }}
           >
-            添加复合图
+            还原
           </Button>
           <Button
             type="primary"
